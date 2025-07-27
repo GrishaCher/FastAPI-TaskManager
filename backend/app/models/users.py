@@ -8,8 +8,8 @@ class User(Base):  # Модель пользователей для таблиц
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    username = Column(String)
+    email = Column(String, nullable=False,unique=True)
     created_at = Column(DateTime, default=datetime.now)
 
     tasks=relationship("Task", back_populates="owner")
