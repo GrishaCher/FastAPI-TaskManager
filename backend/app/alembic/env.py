@@ -4,10 +4,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 
-from app.models.base import Base
-from app.models.users import User
-from app.models.tasks import Task
-from app.models.groups import Group
+from app.db.models.base import Base
+from app.db.models.users import User
+from app.db.models.tasks import Task
+from app.db.models.groups import Group
 
 from app.core.config import settings
 
