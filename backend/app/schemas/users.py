@@ -1,5 +1,5 @@
 from app.schemas.base import BaseModelWithConfig
-from app.schemas.token import Token
+from app.schemas.tokens import Token
 from datetime import datetime
 from typing import Optional
 from pydantic import EmailStr #, HttpUrl 

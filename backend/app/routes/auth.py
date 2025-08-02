@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from jose import JWTError
 
-from app.schemas.user import UserRegister, UserLogin, UserResponse,UserWithToken
-from app.schemas.token import Token
+from app.schemas.users import UserRegister, UserLogin, UserResponse,UserWithToken
+from app.schemas.tokens import Token
 from app.db.models.users import User
 from app.core.security import auth_service
 from app.core.deps import oauth2_refresh_scheme

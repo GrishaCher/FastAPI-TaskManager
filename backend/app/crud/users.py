@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 from app.core.security import auth_service
 from app.db.models.users import User
-from app.schemas.user import UserRegister, UserInUpdate
+from app.schemas.users import UserRegister, UserInUpdate
 
 
 async def create_user(*, session: AsyncSession, user_create: UserRegister) -> User:
