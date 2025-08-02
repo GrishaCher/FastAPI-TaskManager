@@ -1,6 +1,8 @@
 from app.core.config import settings
-from app.core.session import get_db_sessionmaker
+from app.routes import users,auth
 from fastapi import FastAPI
 print(settings.sqlalchemyURL)
-LocalSession=get_db_sessionmaker(postgres_url=settings.sqlalchemyURL)
-#app=FastAPI()
+
+app = FastAPI(title="FastAPI_TaskManager")
+app.include_router(users.router, prefix="/users")
+app.include_router(auth.router, prefix="/users")
