@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.schemas.users import UserResponse,UserInUpdate
-from app.schemas.tokens import Token,RefreshTokenRequest
+from app.schemas.tokens import Token
 from app.db.models.users import User
 from app.core.security import auth_service
 from app.core.deps import get_current_user
 from app.db.session import get_session
 from app.crud.users import update_user
 
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["user"])
 

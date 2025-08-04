@@ -41,7 +41,7 @@ class AuthService:
             return payload
         except JWTError as e:
             return None
-    def verify_refresh_token(self, token: str) -> dict:
+    def verify_refresh_token(self, token: str) -> str:
         payload = self.decode_token(token)
         if not payload:
             raise JWTError("Некорректный токен")
@@ -49,7 +49,7 @@ class AuthService:
         if datetime.fromtimestamp(payload["exp"]) < datetime.now():
             raise JWTError("Истёк срок токена")
         
-        return payload
+        return payload["sub"]
 
 
 auth_service = AuthService()

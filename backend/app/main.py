@@ -5,4 +5,4 @@ print(settings.sqlalchemyURL)
 
 app = FastAPI(title="FastAPI_TaskManager")
 app.include_router(users.router, prefix="/users")
-app.include_router(auth.router, prefix="/users")
+app.include_router(auth.router, prefix="/auth")

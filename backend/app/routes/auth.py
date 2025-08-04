@@ -5,7 +5,7 @@ from app.schemas.users import UserRegister, UserLogin, UserResponse,UserWithToke
 from app.schemas.tokens import Token
 from app.db.models.users import User
 from app.core.security import auth_service
-from app.core.deps import oauth2_refresh_scheme
+from app.core.deps import check_refresh
 from app.db.session import get_session
 from app.crud.users import get_user_by_email, create_user,authenticate
 
@@ -47,7 +47,7 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_session))->
 
 @router.post("/refresh",response_model=UserResponse)
 async def refresh_token(
-    token: str = Depends(oauth2_refresh_scheme),
+    user_email: str = Depends(check_refresh),
     db: AsyncSession = Depends(get_session)
     )-> UserResponse:
     credentials_exception = HTTPException(
@@ -55,13 +55,7 @@ async def refresh_token(
         detail="Данные не прошли проверку",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload=auth_service.decode_token(token)
-    except JWTError as e:
-        #logger.errorf("ошибка JWT")  по хорошему
-        raise HTTPException(401, detail=e)
    
-    user_email = payload.get("sub")
     user = await get_user_by_email(session=db,email=user_email)
     if not user:
         raise credentials_exception
