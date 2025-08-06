@@ -16,4 +16,4 @@ class User(Base):  # Модель пользователей для таблиц
     is_active = Column(Boolean,default=True)
 
     tasks=relationship("Task", back_populates="owner")
-    groups = relationship("Group", secondary="user_groups") 
+    groups = relationship("Group", secondary="user_groups",back_populates="members") 

@@ -1,13 +1,10 @@
-
-from typing import Any
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from fastapi import HTTPException
 
 from app.core.security import auth_service
-from app.db.models.users import User
+from app.db.models import User
 from app.schemas.users import UserRegister, UserInUpdate
 
 

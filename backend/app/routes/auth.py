@@ -3,7 +3,6 @@ from jose import JWTError
 
 from app.schemas.users import UserRegister, UserLogin, UserResponse,UserWithToken
 from app.schemas.tokens import Token
-from app.db.models.users import User
 from app.core.security import auth_service
 from app.core.deps import check_refresh
 from app.db.session import get_session
@@ -22,7 +21,7 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_sessi
         raise HTTPException(status_code=400,
                              detail="Пользователь с таким email уже существует")
     try:
-        new_user=create_user(session=db,user_create=user_data)
+        new_user=await create_user(session=db,user_create=user_data)
     except:
         raise HTTPException(status_code=500,
                              detail="Ошибка сервера")

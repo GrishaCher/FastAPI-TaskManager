@@ -13,7 +13,7 @@ class Group(Base):
     group_description=Column(String(300), default="Рады новым участникам!")
 
     tasks = relationship("Task", back_populates="group")  # Задачи группы
-    members = relationship("User", secondary="groups")  # Участники группы
+    members = relationship("User", secondary="user_groups",back_populates="groups")  # Участники группы
 class GroupRole(PyEnum):
     ADMIN = "admin"
     MEMBER = "member"
@@ -25,6 +25,3 @@ class UserGroup(Base):
     group_id = Column(Integer, ForeignKey("groups.id"), primary_key=True)
     role = Column(Enum(GroupRole), default=GroupRole.MEMBER)
     
-    # Опциональные связи
-    user = relationship("User")
-    group = relationship("Group")
