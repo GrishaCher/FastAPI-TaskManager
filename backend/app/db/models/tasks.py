@@ -7,12 +7,13 @@ class Task(Base):  # Модель задач для таблицы в БД
 
     __tablename__ = 'tasks'
     id = Column(Integer, primary_key=True)
-    title = Column(String)
+    title = Column(String(100), nullable=False)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now)
+    deadline = Column(DateTime, nullable=True)
 
     user_id = Column(Integer, ForeignKey('users.id'))  # Для личных задач
-    group_id = Column(Integer, ForeignKey('groups.id'))  # Для групповых задач
+    group_id = Column(Integer, ForeignKey('groups.id'),nullable=True)  # Для групповых задач
     # Связи
     owner = relationship("User", back_populates="tasks")
     group = relationship("Group", back_populates="tasks")
