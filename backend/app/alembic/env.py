@@ -7,7 +7,7 @@ from alembic import context
 from app.db.models.base import Base
 from app.db.models.users import User
 from app.db.models.tasks import Task
-from app.db.models.groups import Group
+from app.db.models.groups import Group, UserGroup
 
 from app.core.config import settings
 

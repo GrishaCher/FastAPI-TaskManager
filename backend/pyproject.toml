@@ -22,3 +22,9 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 [build-system]
 requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+migrate = "app.alembic.run:main"
+migrate-up = "app.alembic.run:upgrade"
+migrate-down = "app.alembic.run:downgrade"
+migrate-create = "app.alembic.run:create_migration"
