@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime,Boolean
 from sqlalchemy.orm import relationship
-from app.db.models.base import Base
+from app.db.models.base import Base,SerializerMixin
 from datetime import datetime
 
-class User(Base):  # Модель пользователей для таблицы в БД
+class User(Base,SerializerMixin):  # Модель пользователей для таблицы в БД
 
     __tablename__ = "users"
 

@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.models.base import Base
+from app.db.models.base import Base,SerializerMixin
 from datetime import datetime
 
-class Task(Base):  # Модель задач для таблицы в БД
+class Task(Base,SerializerMixin):  # Модель задач для таблицы в БД
 
     __tablename__ = 'tasks'
     id = Column(Integer, primary_key=True)
