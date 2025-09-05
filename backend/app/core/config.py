@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     DB_HOST:str
     DB_PORT:str
     DB_NAME:str
+    LOG_LEVEL:str="DEBUG"
+    LOG_FILE:str=""
+    CONSOLE_LOG:bool=False
     @computed_field
     @property
     def sqlalchemyURL(self)->str:
