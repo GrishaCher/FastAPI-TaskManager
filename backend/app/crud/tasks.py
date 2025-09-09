@@ -1,57 +1,85 @@
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select,func
 
-# from fastapi import HTTPException
+from fastapi import HTTPException
 
-# from app.core.security import auth_service
-# from app.db.models.users import User
-# from app.schemas.users import UserRegister, UserInUpdate
+from app.db.models import Task
+from app.schemas.tasks import TaskCreate,TaskInUpdate,PaginatedTasksResponse
 
+import logging
+logger = logging.getLogger("app")
 
-# async def create_user_task(*, session: AsyncSession, user_create: UserRegister) -> User:
-#     db_obj = User.model_validate(
-#         user_create,
-#         update={"hashed_password": auth_service.get_password_hash(user_create.password)}
-#     )
-#     session.add(db_obj)
-#     await session.commit()
-#     await session.refresh(db_obj)
-#     return db_obj
+async def create_task(*, session: AsyncSession, user_id: int,task_data:TaskCreate) -> Task:
 
-
-# async def update_user(*, session: AsyncSession, db_user: User, user_in: UserInUpdate) -> User:
-#     user_data = user_in.model_dump(exclude_unset=True)
-#     if not user_data:
-#         raise HTTPException(
-#                 status_code=400,
-#                 detail="поля не выбранны",
-#             ) 
-#     if "password" in user_data:
-#         user_data["hashed_password"] = auth_service.get_password_hash(user_data.pop("password"))
-#     for key, value in user_data.items():
-#         setattr(db_user, key, value)
-#     session.add(db_user)
-#     await session.commit()
-#     await session.refresh(db_user)
-#     return db_user
+    logger.debug(f"попытка создать задачу {task_data.title} пользователем с id: {user_id}")
+    db_task = Task(
+        title = task_data.title,
+        deadline = task_data.deadline,
+        user_id = user_id
+        #group_id = Column(Integer, ForeignKey('groups.id'),nullable=True)  
+    )
+    session.add(db_task)
+    await session.commit()
+    await session.refresh(db_task)
+    logger.info(f"Задача {db_task.title} пользователя с id: {db_task.user_id} сохранён")
+    return db_task
 
 
-# async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:
-#     statement = select(User).where(User.email==email)
-#     curent_user = await session.scalars(statement)
-#     if curent_user:
-#         return curent_user.first()
-#     raise HTTPException(
-#                 status_code=400,
-#                 detail="данный пользователь не найден",
-#             ) 
+async def update_task(*, session: AsyncSession, user_id: int, task_id:int, task_in:TaskInUpdate) -> Task:
+    task_data = task_in.model_dump(exclude_unset=True)
+    if not task_data:
+        logger.debug("нет данных обновления")
+        raise HTTPException(
+                status_code=400,
+                detail="поля не выбранны",
+            ) 
+    task=await get_task_by_id(session=session, task_id=task_id, user_id=user_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    for key, value in task_data.items():
+        setattr(task, key, value)
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    logger.info(f"задача {task.to_dict()}  сохранена")
+    return task
 
 
-# async def authenticate(*, session: AsyncSession, email: str, password: str) -> User | None:
-#     db_user =await get_user_by_email(session=session, email=email)
-#     if not auth_service.verify_password(password, db_user.hashed_password):
-#         raise HTTPException(
-#                 status_code=400,
-#                 detail="неверный пароль",
-#             )
-#     return db_user
+async def get_user_tasks(*, session: AsyncSession, user_id:int,skip,limit,completed) -> PaginatedTasksResponse | None:
+    query = select(Task).where(Task.user_id == user_id) 
+    if completed is not None:
+        query = query.where(Task.is_completed == completed)
+    result = await session.execute(query.offset(skip).limit(limit))
+    tasks = result.scalars().all()
+    
+    total_result = await session.execute(
+        select(func.count()).where(Task.user_id == user_id)
+    )
+    total = total_result.scalar()
+    
+    return PaginatedTasksResponse.model_validate(
+        {
+        "tasks": tasks,
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        }
+    )
+
+async def get_task_by_id(*, session: AsyncSession, task_id: int, user_id:int) -> Task | None:
+    current_task = await session.get(Task, task_id)
+    
+    if current_task.user_id != user_id:  
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return current_task
+
+async def delete_task_by_id(*, session: AsyncSession, task_id: int, user_id:int) -> dict:
+    logger.info(f"попытка удачить задачу с id: {task_id}")
+    task=await get_task_by_id(session=session,user_id=user_id,task_id=task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    await session.delete(task)
+    await session.commit()
+    
+    return {"message": f"удалена задача с id: {task_id}"}
