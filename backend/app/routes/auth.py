@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 
-from app.schemas.users import UserRegister, UserLogin, UserResponse,UserWithToken
+from app.schemas.users import UserRegister,UserWithToken
 from app.schemas.tokens import Token
 from app.core.security import auth_service
 from app.core.deps import check_refresh
@@ -11,13 +12,17 @@ from app.crud.users import get_user_by_email, create_user, authenticate, get_use
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import logging
+
+
 logger = logging.getLogger("app")
+
 
 router = APIRouter(tags=["auth"])
 
+
 @router.post("/register", response_model=UserWithToken)
 async def register(user_data: UserRegister, db: AsyncSession = Depends(get_session))-> UserWithToken:
-    logger.debug("защёл в роут регистрации")
+    logger.debug(f"начало регистрации пользователя: {user_data}")
     
     if await get_user_by_email(session=db,email=user_data.email):
         raise HTTPException(status_code=401,
@@ -45,24 +50,21 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_sessi
     )
 
 
-@router.post("/login", response_model=UserWithToken)
-async def login(user_data: UserLogin, db: AsyncSession = Depends(get_session))-> UserWithToken:
-    curent_user = await authenticate(session=db,email=user_data.email,password=user_data.password)
+@router.post("/login", response_model=Token)
+async def login(user_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session))-> Token:
+    curent_user = await authenticate(session=db,email=user_data.username,password=user_data.password)
     new_access_token = auth_service.create_access_token(curent_user.email)
     new_refresh_token = auth_service.create_refresh_token(curent_user.email)
     ResponseToken = Token(access_token=new_access_token,
                         refresh_token=new_refresh_token)
-    return UserWithToken.model_validate(
-        {**curent_user.to_dict(),
-        "token":ResponseToken}
-    )
+    return ResponseToken
 
 
-@router.post("/refresh",response_model=UserWithToken)
+@router.post("/refresh",response_model=Token)
 async def refresh_token(
     user_email: str = Depends(check_refresh),
     db: AsyncSession = Depends(get_session)
-    )-> UserWithToken:
+    )-> Token:
     credentials_exception = HTTPException(
         status_code=401,
         detail="Данные не прошли проверку",
@@ -79,8 +81,4 @@ async def refresh_token(
         {"access_token":new_access_token,
         "refresh_token":new_refresh_token}
     )
-    print(ResponseToken)
-    return UserWithToken.model_validate(
-        {**user.to_dict(),
-        "token":ResponseToken}
-    )
+    return ResponseToken

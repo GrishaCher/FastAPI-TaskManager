@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
-from jose import JWTError, jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.context import CryptContext
 from app.core.config import settings
 
-
+import logging
+logger = logging.getLogger("app")
 
 class AuthService:
     def __init__(self):
@@ -39,6 +40,9 @@ class AuthService:
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return payload
+        except ExpiredSignatureError:
+            logger.warning("Токен истек")
+            return None
         except JWTError as e:
             return None
     def verify_refresh_token(self, token: str) -> str:

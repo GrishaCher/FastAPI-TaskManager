@@ -9,7 +9,6 @@ def patch_bcrypt():
             __version__ = bcrypt.__version__
         
         bcrypt.__about__ = MockAbout()
-    print(1)
     logger.info(f"✅ BCrypt patched: {bcrypt.__version__}")
 
 # Вызываем патч при импорте
