@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 
 from app.db.models.base import Base
-from app.db.models import User,Task,Group, UserGroup
+from app.db.models import User,Task,Group, UserGroup,EmailVerificationDB
 
 
 from app.core.config import settings
