@@ -10,18 +10,30 @@ from app.patches.bcrypt_fix import * # потом импортирую патч 
 
 from app.core.config import settings # остальные импорты
 from app.routes import users,auth,tasks
-from fastapi import FastAPI
+from fastapi import FastAPI,Depends
 from app.db.session import engine
-from fastapi import Request, HTTPException
-from sqlalchemy.exc import DBAPIError
-from sqlalchemy.ext.asyncio import AsyncSession
+from contextlib import asynccontextmanager
+from app.utils import run_periodic_cleanup
+import asyncio
 
 logger = logging.getLogger("app")
 
-app = FastAPI(title="FastAPI_TaskManager")
-@app.on_event("shutdown")
-async def shutdown_db_connection():
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    cleanup_task = asyncio.create_task(run_periodic_cleanup())
+    
+    yield  # Здесь приложение работает
     await engine.dispose()
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+
+app = FastAPI(title="FastAPI_TaskManager",lifespan=lifespan)
+
+
 app.include_router(users.router, prefix="/users")
 app.include_router(auth.router, prefix="/auth")
 app.include_router(tasks.router, prefix="/tasks")
