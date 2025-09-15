@@ -34,9 +34,10 @@ async def send_verification_email(email: str, token: str):
             msg,
             hostname=settings.SMTP_HOST,
             port=settings.SMTP_PORT,
-            use_tls=True,
             username=settings.SMTP_USER,
-            password=settings.SMTP_PASSWORD
+            password=settings.SMTP_PASSWORD,  
+            start_tls=settings.smtp_use_tls,  
+            timeout=10  
         )
     except Exception as e:
         logger.error(f"Failed to send email: {e}")

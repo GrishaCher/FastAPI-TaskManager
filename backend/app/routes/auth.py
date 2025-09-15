@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
-
+from datetime import datetime,timedelta
 from app.schemas.users import UserRegister,UserWithToken
 from app.schemas.tokens import Token
 from app.core.security import auth_service
 from app.core.deps import check_refresh
 from app.db.session import get_session
 from app.crud.users import get_user_by_email, create_user, authenticate, get_user_by_username
+from app.crud.emailVerification import create_verification,get_verification
+from app.db.models import EmailVerificationDB
+from app.utils import send_verification_email
+from sqlalchemy import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,8 +24,8 @@ logger = logging.getLogger("app")
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/register", response_model=UserWithToken)
-async def register(user_data: UserRegister, db: AsyncSession = Depends(get_session))-> UserWithToken:
+@router.post("/register", response_model=dict,status_code=202)
+async def register(user_data: UserRegister, db: AsyncSession = Depends(get_session))-> dict:
     logger.debug(f"начало регистрации пользователя: {user_data}")
     
     if await get_user_by_email(session=db,email=user_data.email):
@@ -33,8 +37,36 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_sessi
         raise HTTPException(status_code=401,
                              detail="Пользователь с таким именем уже существует") 
     logger.debug(f"пользователя с таким username {user_data.username} пока нет")
+    
+    verification=await create_verification(session=db,user_data=user_data)
+        
+        # Отправляем email с ссылкой подтверждения
     try:
-        new_user=await create_user(session=db,user_create=user_data)
+        await send_verification_email(verification.email, verification.token)
+    except:
+        pass
+    return {"message": f"email has been sent to {verification.email}"}
+
+
+@router.post("/verify-email/{token}",response_model=UserWithToken)
+async def verify_email(
+    token: str,
+    db: AsyncSession = Depends(get_session)
+)->UserWithToken:
+    verification=await get_verification(token=token,session=db)
+    if verification is None:
+        raise HTTPException(
+            status_code=400,
+            detail="The link expired"
+        )
+    
+    try:
+        new_user =await create_user(
+        user_email = verification.email, 
+        password_hash = verification.hashed_password,
+        username = verification.username,
+        session = db
+    )
         logger.info(f"создан пользователь с email: {new_user.email}")
     except Exception as e:
         logger.error(f"ошибка создания пользователя {e}")

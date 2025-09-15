@@ -10,11 +10,26 @@ from app.schemas.users import UserRegister, UserInUpdate
 import logging
 logger = logging.getLogger("app")
 
-async def create_user(*, session: AsyncSession, user_create: UserRegister) -> User:
+# async def create_user(*, session: AsyncSession, user_create: UserRegister) -> User:
+#     db_obj = User(
+#         username=user_create.username,
+#         email=user_create.email,
+#         hashed_password= auth_service.get_password_hash(user_create.password)
+#     )
+#     logger.debug(f"попытка сохранить пользователя с email: {db_obj.email}")
+    
+#     session.add(db_obj)
+#     await session.commit()
+#     await session.refresh(db_obj)
+#     logger.info(f"пользователь с email: {db_obj.email} сохранён")
+#     return db_obj
+
+
+async def create_user(*, session: AsyncSession, user_email:str,password_hash:str,username:str) -> User:
     db_obj = User(
-        username=user_create.username,
-        email=user_create.email,
-        hashed_password= auth_service.get_password_hash(user_create.password)
+        username = username,
+        email = user_email,
+        hashed_password = password_hash
     )
     logger.debug(f"попытка сохранить пользователя с email: {db_obj.email}")
     
@@ -23,7 +38,7 @@ async def create_user(*, session: AsyncSession, user_create: UserRegister) -> Us
     await session.refresh(db_obj)
     logger.info(f"пользователь с email: {db_obj.email} сохранён")
     return db_obj
-
+    
 
 async def update_user(*, session: AsyncSession, db_user: User, user_in: UserInUpdate) -> User:
     user_data = user_in.model_dump(exclude_unset=True)

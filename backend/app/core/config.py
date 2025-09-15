@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int 
     SMTP_USER: str
     SMTP_PASSWORD: str
+    smtp_use_tls:bool
     
     # Frontend URL для ссылок
     FRONTEND_URL: str = "http://localhost:3000"
