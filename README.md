@@ -50,7 +50,7 @@ Poetry
 
 Клонируйте репозиторий
 
-```
+```bash
 git clone https://github.com/GrishaCher/FastAPI-TaskManager.git
 
 cd FastAPI-TaskManager/backend
