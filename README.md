@@ -41,29 +41,37 @@ PostgreSQL 14+
 
 Poetry
 
-УСТВНОВКА
+Установка
+
 Клонируйте репозиторий
 
 git clone https://github.com/GrishaCher/FastAPI-TaskManager.git
+
 cd FastAPI-TaskManager/backend
 
 Установите зависимости
 
 Перейдите в папку backend и пропишите в терминалк:
+
 poetry install --no-root
+
 poetry shell
 
 Настройте переменные окружения
+
 Создайте файл .env в папке backend и настройте его
 
 Создайте бд:
 poetry run alembic upgrade head
 
 Можно пользоваться:
+
 poetry run uvicorn app.main:app --reload
+
 Приложение будет доступно по адресу: http://localhost:8000
 
 📚 Документация API
+
 После запуска приложения доступны:
 
 Swagger UI: http://localhost:8000/docs
@@ -71,6 +79,9 @@ Swagger UI: http://localhost:8000/docs
 ReDoc: http://localhost:8000/redoc
 
 Применение миграций
+
 poetry run create_migration -m "" 
+
 poetry run migrate-up 
+
 poetry run migrate-down 
