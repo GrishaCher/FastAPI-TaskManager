@@ -70,7 +70,7 @@ Swagger UI: http://localhost:8000/docs
 
 ReDoc: http://localhost:8000/redoc
 
-# Применение миграций
+Применение миграций
 poetry run create_migration -m "" #создание миграции
 poetry run migrate-up #переход бд к след миграции
 poetry run migrate-down #переход бд к предыдущей миграции
