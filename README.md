@@ -80,6 +80,20 @@ poetry run uvicorn app.main:app --reload
 ```
 Приложение будет доступно по адресу: http://localhost:8000
 
+
+Развёртывание с Docker
+
+Установите инструменты ``docker`` и ``docker-compose``.
+Создайте ``.env`` согласно ``.env.example``.
+``POSTGRES_HOST`` должен быть `db` или измените ``docker-compose.yml``.
+Потом запустите:
+
+```bash
+docker-compose build --no-cache
+docker-compose up
+```
+
+
 📚 Документация API
 
 После запуска приложения доступны:

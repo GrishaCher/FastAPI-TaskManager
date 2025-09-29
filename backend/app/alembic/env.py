@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Добавляем корневую директорию в Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine

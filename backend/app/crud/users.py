@@ -73,10 +73,16 @@ async def get_user_by_id(*, session: AsyncSession, id: int) -> User | None:
     current_user = await session.get(User, id)
     return current_user
 async def authenticate(*, session: AsyncSession, email: str, password: str) -> User | None:
-    db_user =await get_user_by_email(session=session, email=email)
+    try:
+        db_user =await get_user_by_email(session=session, email=email)
+    except:
+        raise HTTPException(
+                status_code=401,
+                detail="user was not found",
+            )
     if not auth_service.verify_password(password, db_user.hashed_password):
         raise HTTPException(
                 status_code=401,
-                detail="неверный пароль",
+                detail="wrong password",
             )
     return db_user
