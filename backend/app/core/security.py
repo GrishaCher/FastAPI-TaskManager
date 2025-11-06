@@ -5,15 +5,21 @@ from passlib.context import CryptContext
 from app.core.config import settings
 
 import logging
+
 logger = logging.getLogger("app")
+
 
 class AuthService:
     def __init__(self):
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self.secret_key = settings.SECRET_KEY
         self.algorithm = settings.ALGORITHM
-        self.access_token_expire_minutes = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        self.refresh_token_expire_days = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        self.access_token_expire_minutes = timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+        self.refresh_token_expire_days = timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
 
     def get_password_hash(self, password: str) -> str:
         hashed = self.pwd_context.hash(password)
@@ -35,7 +41,6 @@ class AuthService:
         token = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return token
 
-
     def decode_token(self, token: str):
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
@@ -43,16 +48,17 @@ class AuthService:
         except ExpiredSignatureError:
             logger.warning("Токен истек")
             return None
-        except JWTError as e:
+        except JWTError:
             return None
+
     def verify_refresh_token(self, token: str) -> str:
         payload = self.decode_token(token)
         if not payload:
             raise JWTError("Некорректный токен")
-        
+
         if datetime.fromtimestamp(payload["exp"]) < datetime.now():
             raise JWTError("Истёк срок токена")
-        
+
         return payload["sub"]
 
 

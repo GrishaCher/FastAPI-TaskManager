@@ -1,20 +1,19 @@
-from app.core.logger import setup_logger # сначала импортирую логгер
+from app.core.logger import setup_logger  # сначала импортирую логгер
 import logging
-setup_logger(
-    log_level=logging.DEBUG,
-    log_file="app.log",
-    console_log=True
-)
 
-from app.patches.bcrypt_fix import * # потом импортирую патч bcrypt для корректной работы passlib
+setup_logger(log_level=logging.DEBUG, log_file="app.log", console_log=True)
 
-from app.core.config import settings # остальные импорты
-from app.routes import users,auth,tasks
-from fastapi import FastAPI,Depends
+# потом импортирую патч bcrypt для корректной работы passlib
+from app.patches.bcrypt_fix import *  
+
+# остальные импорты
+from app.routes import users, auth, tasks
+from fastapi import FastAPI
 from app.db.session import engine
 from contextlib import asynccontextmanager
 from app.utils import run_periodic_cleanup
 import asyncio
+
 
 logger = logging.getLogger("app")
 
@@ -22,8 +21,8 @@ logger = logging.getLogger("app")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cleanup_task = asyncio.create_task(run_periodic_cleanup())
-    
-    yield  # Здесь приложение работает
+    yield
+
     await engine.dispose()
     cleanup_task.cancel()
     try:
@@ -31,7 +30,8 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
-app = FastAPI(title="FastAPI_TaskManager",lifespan=lifespan)
+
+app = FastAPI(title="FastAPI_TaskManager", lifespan=lifespan)
 
 
 app.include_router(users.router, prefix="/users")

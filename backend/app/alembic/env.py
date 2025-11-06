@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 
 from app.db.models.base import Base
-from app.db.models import User,Task,Group, UserGroup,EmailVerificationDB
+from app.db.models import User, Task, Group, UserGroup, EmailVerificationDB
 
 
 from app.core.config import settings
@@ -37,26 +37,31 @@ if config.config_file_name is not None:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+
 def do_run_migrations(connection):
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
         compare_type=True,
-        compare_server_default=True
+        compare_server_default=True,
     )
     with context.begin_transaction():
         context.run_migrations()
 
+
 async def run_migrations_online():
     """Run migrations in 'online' mode with async engine."""
     connectable = create_async_engine(settings.sqlalchemyURL)
-    
+
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
 
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode."""
-    url = settings.sqlalchemyURL.replace("+asyncpg", "")  # Убираем asyncpg для оффлайн-режима
+    url = settings.sqlalchemyURL.replace(
+        "+asyncpg", ""
+    )  # Убираем asyncpg для оффлайн-режима
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -66,8 +71,10 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
+
 if context.is_offline_mode():
     run_migrations_offline()
 else:
     import asyncio
+
     asyncio.run(run_migrations_online())

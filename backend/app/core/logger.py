@@ -1,10 +1,12 @@
 import logging
 from app.core.config import settings
+
+
 def setup_logger(
     disable_logging: bool = False,
     log_level: int = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
     log_file: str = settings.LOG_FILE,
-    console_log: bool = True
+    console_log: bool = True,
 ) -> None:
     if disable_logging:
         logging.disable(logging.CRITICAL)
@@ -27,11 +29,12 @@ def setup_logger(
 
     if log_file:
         from logging.handlers import RotatingFileHandler
+
         fh = RotatingFileHandler(
-            log_file, 
-            maxBytes=10*1024*1024,  # 10 MB
+            log_file,
+            maxBytes=10 * 1024 * 1024,  # 10 MB
             backupCount=5,
-            encoding="utf-8"
+            encoding="utf-8",
         )
         fh.setFormatter(formatter)
         logger.addHandler(fh)

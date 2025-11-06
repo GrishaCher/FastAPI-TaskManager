@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime,Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from app.db.models.base import Base,SerializerMixin
+from app.db.models.base import Base, SerializerMixin
 from datetime import datetime
 
-class User(Base,SerializerMixin):  # Модель пользователей для таблицы в БД
+
+class User(Base, SerializerMixin):  # Модель пользователей для таблицы в БД
 
     __tablename__ = "users"
 
@@ -12,8 +13,8 @@ class User(Base,SerializerMixin):  # Модель пользователей д�
     email = Column(String(100), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, onupdate=datetime.now)
-    hashed_password=Column(String,nullable=False)
-    is_active = Column(Boolean,default=True)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
 
-    tasks=relationship("Task", back_populates="owner")
-    groups = relationship("Group", secondary="user_groups",back_populates="members") 
+    tasks = relationship("Task", back_populates="owner")
+    groups = relationship("Group", secondary="user_groups", back_populates="members")
